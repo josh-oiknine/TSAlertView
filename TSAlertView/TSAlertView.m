@@ -349,7 +349,11 @@ const CGFloat kTSAlertView_ColumnMargin = 10.0;
 		_titleLabel = [[UILabel alloc] init];
 		_titleLabel.font = [UIFont boldSystemFontOfSize: 18];
 		_titleLabel.backgroundColor = [UIColor clearColor];
-		_titleLabel.textColor = [UIColor whiteColor];
+        if (floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_6_1) {
+            _titleLabel.textColor = [UIColor whiteColor];
+        } else {
+            _titleLabel.textColor = [UIColor blackColor];
+        }
 		_titleLabel.textAlignment = UITextAlignmentCenter;
 		_titleLabel.lineBreakMode = UILineBreakModeWordWrap;
 		_titleLabel.numberOfLines = 0;
@@ -431,7 +435,11 @@ const CGFloat kTSAlertView_ColumnMargin = 10.0;
 {
 	if ( _backgroundImage == nil )
 	{
-		self.backgroundImage = [[UIImage imageNamed: @"TSAlertViewBackground.png"] stretchableImageWithLeftCapWidth: 15 topCapHeight: 30];
+        if (floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_6_1) {
+            self.backgroundImage = [[UIImage imageNamed: @"TSAlertViewBackground.png"] stretchableImageWithLeftCapWidth: 15 topCapHeight: 30];
+        } else {
+            self.backgroundImage = [[UIImage imageNamed: @"TSAlertViewBackground-iOS7.png"] stretchableImageWithLeftCapWidth: 15 topCapHeight: 30];
+        }
 	}
 	
 	return _backgroundImage;
@@ -492,14 +500,19 @@ const CGFloat kTSAlertView_ColumnMargin = 10.0;
 	UIButton* b = [UIButton buttonWithType: UIButtonTypeCustom];
 	[b setTitle: t forState: UIControlStateNormal];
 	
-	UIImage* buttonBgNormal = [UIImage imageNamed: @"TSAlertViewButtonBackground.png"];
-	buttonBgNormal = [buttonBgNormal stretchableImageWithLeftCapWidth: buttonBgNormal.size.width / 2.0 topCapHeight: buttonBgNormal.size.height / 2.0];
-	[b setBackgroundImage: buttonBgNormal forState: UIControlStateNormal];
-	
-	UIImage* buttonBgPressed = [UIImage imageNamed: @"TSAlertViewButtonBackground_Highlighted.png"];
-	buttonBgPressed = [buttonBgPressed stretchableImageWithLeftCapWidth: buttonBgPressed.size.width / 2.0 topCapHeight: buttonBgPressed.size.height / 2.0];
-	[b setBackgroundImage: buttonBgPressed forState: UIControlStateHighlighted];
-	
+    if (floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_6_1) {
+
+        UIImage* buttonBgNormal = [UIImage imageNamed: @"TSAlertViewButtonBackground.png"];
+        buttonBgNormal = [buttonBgNormal stretchableImageWithLeftCapWidth: buttonBgNormal.size.width / 2.0 topCapHeight: buttonBgNormal.size.height / 2.0];
+        [b setBackgroundImage: buttonBgNormal forState: UIControlStateNormal];
+        
+        UIImage* buttonBgPressed = [UIImage imageNamed: @"TSAlertViewButtonBackground_Highlighted.png"];
+        buttonBgPressed = [buttonBgPressed stretchableImageWithLeftCapWidth: buttonBgPressed.size.width / 2.0 topCapHeight: buttonBgPressed.size.height / 2.0];
+        [b setBackgroundImage: buttonBgPressed forState: UIControlStateHighlighted];
+    } else {
+        [b setTitleColor:[UIColor blueColor] forState:UIControlStateNormal];
+    }
+    
 	[b addTarget: self action: @selector(onButtonPress:) forControlEvents: UIControlEventTouchUpInside];
 	
 	[self.buttons addObject: b];
