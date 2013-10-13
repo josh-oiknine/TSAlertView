@@ -354,8 +354,8 @@ const CGFloat kTSAlertView_ColumnMargin = 10.0;
         } else {
             _titleLabel.textColor = [UIColor blackColor];
         }
-		_titleLabel.textAlignment = UITextAlignmentCenter;
-		_titleLabel.lineBreakMode = UILineBreakModeWordWrap;
+		_titleLabel.textAlignment = NSTextAlignmentCenter;
+		_titleLabel.lineBreakMode = NSLineBreakByWordWrapping;
 		_titleLabel.numberOfLines = 0;
         
         [self addSubview: _titleLabel];
@@ -371,9 +371,13 @@ const CGFloat kTSAlertView_ColumnMargin = 10.0;
 		_messageLabel = [[UILabel alloc] init];
 		_messageLabel.font = [UIFont systemFontOfSize: 16];
 		_messageLabel.backgroundColor = [UIColor clearColor];
-		_messageLabel.textColor = [UIColor whiteColor];
-		_messageLabel.textAlignment = UITextAlignmentCenter;
-		_messageLabel.lineBreakMode = UILineBreakModeWordWrap;
+        if (floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_6_1) {
+            _messageLabel.textColor = [UIColor whiteColor];
+        } else {
+            _messageLabel.textColor = [UIColor blackColor];
+        }
+		_messageLabel.textAlignment = NSTextAlignmentCenter;
+		_messageLabel.lineBreakMode = NSLineBreakByWordWrapping;
 		_messageLabel.numberOfLines = 0;
         
         [self addSubview: _messageLabel];
@@ -391,7 +395,7 @@ const CGFloat kTSAlertView_ColumnMargin = 10.0;
 		_messageTextView.font = [UIFont systemFontOfSize: 16];
 		_messageTextView.backgroundColor = [UIColor whiteColor];
 		_messageTextView.textColor = [UIColor darkTextColor];
-		_messageTextView.textAlignment = UITextAlignmentLeft;
+		_messageTextView.textAlignment = NSTextAlignmentLeft;
 		_messageTextView.bounces = YES;
 		_messageTextView.alwaysBounceVertical = YES;
 		_messageTextView.layer.cornerRadius = 5;
@@ -495,13 +499,17 @@ const CGFloat kTSAlertView_ColumnMargin = 10.0;
 	return self.superview != nil;
 }
 
-- (NSInteger) addButtonWithTitle: (NSString *) t
+- (NSInteger) addButtonWithTitle: (NSString *) t {
+	return [self addButtonWithTitle:t textColor:[UIColor blueColor]];
+}
+
+- (NSInteger) addButtonWithTitle: (NSString *) t textColor:(UIColor *)textColor
 {
 	UIButton* b = [UIButton buttonWithType: UIButtonTypeCustom];
 	[b setTitle: t forState: UIControlStateNormal];
 	
     if (floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_6_1) {
-
+        
         UIImage* buttonBgNormal = [UIImage imageNamed: @"TSAlertViewButtonBackground.png"];
         buttonBgNormal = [buttonBgNormal stretchableImageWithLeftCapWidth: buttonBgNormal.size.width / 2.0 topCapHeight: buttonBgNormal.size.height / 2.0];
         [b setBackgroundImage: buttonBgNormal forState: UIControlStateNormal];
@@ -510,7 +518,7 @@ const CGFloat kTSAlertView_ColumnMargin = 10.0;
         buttonBgPressed = [buttonBgPressed stretchableImageWithLeftCapWidth: buttonBgPressed.size.width / 2.0 topCapHeight: buttonBgPressed.size.height / 2.0];
         [b setBackgroundImage: buttonBgPressed forState: UIControlStateHighlighted];
     } else {
-        [b setTitleColor:[UIColor blueColor] forState:UIControlStateNormal];
+        [b setTitleColor:textColor forState:UIControlStateNormal];
     }
     
 	[b addTarget: self action: @selector(onButtonPress:) forControlEvents: UIControlEventTouchUpInside];
@@ -534,6 +542,8 @@ const CGFloat kTSAlertView_ColumnMargin = 10.0;
 	
 	return [b titleForState: UIControlStateNormal];
 }
+
+//textColor
 
 - (void) dismissWithClickedButtonIndex: (NSInteger)buttonIndex animated: (BOOL) animated
 {
@@ -775,21 +785,23 @@ const CGFloat kTSAlertView_ColumnMargin = 10.0;
 - (CGSize) titleLabelSize
 {
 	CGFloat maxWidth = self.width - (kTSAlertView_LeftMargin * 2);
-	CGSize s = [self.titleLabel.text sizeWithFont: self.titleLabel.font constrainedToSize: CGSizeMake(maxWidth, 1000) lineBreakMode: self.titleLabel.lineBreakMode];
-	if ( s.width < maxWidth )
-		s.width = maxWidth;
-	
-	return s;
+    CGRect s = [self.titleLabel.text boundingRectWithSize:CGSizeMake(maxWidth, 1000) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName:self.titleLabel.font} context:nil];
+    
+    
+	if ( s.size.width < maxWidth )
+		s.size.width = maxWidth;
+    
+	return s.size;
 }
 
 - (CGSize) messageLabelSize
 {
 	CGFloat maxWidth = self.width - (kTSAlertView_LeftMargin * 2);
-	CGSize s = [self.messageLabel.text sizeWithFont: self.messageLabel.font constrainedToSize: CGSizeMake(maxWidth, 1000) lineBreakMode: self.messageLabel.lineBreakMode];
-	if ( s.width < maxWidth )
-		s.width = maxWidth;
+    CGRect s = [self.messageLabel.text boundingRectWithSize:CGSizeMake(maxWidth, 1000) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName:self.messageLabel.font} context:nil];
+	if ( s.size.width < maxWidth )
+		s.size.width = maxWidth;
 	
-	return s;
+	return s.size;
 }
 
 - (CGSize) inputTextFieldSize
